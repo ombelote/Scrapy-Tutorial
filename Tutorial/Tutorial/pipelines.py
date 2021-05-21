@@ -10,5 +10,4 @@ from itemadapter import ItemAdapter
 
 class TutorialPipeline:
     def process_item(self, item, spider):
-    	print("Pipeline :"+ str(item['title'][0]))
     	return item
