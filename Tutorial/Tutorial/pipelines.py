@@ -6,9 +6,38 @@
 
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
+import mysql.connector
 
+class TutorialPipeline(object):
+	def __init__(self):
+		self.create_conection()
+		self.create_table()
 
-class TutorialPipeline:
-    def process_item(self, item, spider):
-    	print("Pipeline :"+ str(item['title'][0]))
-    	return item
+	def create_conection(self):
+		self.conn = mysql.connector.connect(
+			host = 'localhost',
+			user = 'root',
+			passwd = '*************',
+			database = 'my_quotes')
+		self.curr = self.conn.cursor()
+	
+	def create_table(self):
+		self.curr.execute("""DROP TABLE IF EXISTS quotes_tb""")
+
+		self.curr.execute("""CREATE TABLE quotes_tb(
+                    title text,
+                    author text,
+                    tag text)""")
+
+	def process_item(self, item, spider):
+		# print("Printing all values: {},{},{}".format(item['title'][0],item['author'][0],item['tag']))
+		self.store_db(item)
+		return item
+
+	def store_db(self,item):
+		self.curr.execute("""insert into quotes_tb values (%s,%s,%s)""",(
+			str(item['title'][0]),
+			str(item['author'][0]),
+			str(item['tag'])
+		))
+		self.conn.commit()
